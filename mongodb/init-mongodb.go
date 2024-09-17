@@ -2,6 +2,8 @@ package mongodb
 
 import (
 	"context"
+	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -37,6 +39,11 @@ func GetClient(ctx context.Context, uri string, dbName string) (*mongo.Client, e
 
 		log.Println("Connected to MongoDB!")
 		database = client.Database(dbName)
+
+		// Create the time series logs collection if it doesn't exist
+		if err := ensureLogsCollectionExists(ctx, database); err != nil {
+			log.Fatalf("Failed to create logs collection: %v", err)
+		}
 	})
 
 	return client, nil
@@ -52,4 +59,36 @@ func Disconnect(ctx context.Context) {
 			log.Printf("Failed to disconnect from MongoDB: %v", err)
 		}
 	}
+}
+
+// ensureLogsCollectionExists checks if the "logs" collection exists, and if not, creates it as a time series collection
+func ensureLogsCollectionExists(ctx context.Context, db *mongo.Database) error {
+	collectionName := "logs"
+
+	// Check if the collection already exists
+	collections, err := db.ListCollectionNames(ctx, bson.M{"name": collectionName})
+	if err != nil {
+		return fmt.Errorf("failed to list collections: %v", err)
+	}
+
+	// If the collection exists, return early
+	if len(collections) > 0 {
+		log.Printf("Collection %s already exists", collectionName)
+		return nil
+	}
+
+	// Create the time series collection if it doesn't exist
+	metadataField := "metadata" // Metadata field should be a pointer to string
+	opts := options.CreateCollection().SetTimeSeriesOptions(&options.TimeSeriesOptions{
+		TimeField: "timestamp",    // Field for the time series timestamp
+		MetaField: &metadataField, // Pointer to the metadata field name
+	})
+
+	err = db.CreateCollection(ctx, collectionName, opts)
+	if err != nil {
+		return fmt.Errorf("failed to create time series collection: %v", err)
+	}
+
+	log.Printf("Time series collection %s created.", collectionName)
+	return nil
 }

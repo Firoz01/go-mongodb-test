@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
+	"time"
 )
 
 func insertMovie(ctx context.Context, inputMovie collections.InputMovie, moviesCollection, castsCollection *mongo.Collection) (interface{}, error) {
@@ -87,6 +88,19 @@ func CreateMovie(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	logEntry := collections.LogEntry{
+		Timestamp: time.Now(),
+		Message:   "new movie inserted",
+		Level:     "INFO",
+		Metadata: map[string]interface{}{
+			"service": "order-tracking",
+			"status":  "success",
+			"data":    inputMovie,
+		},
+	}
+
+	_ = mongodb.InsertLogEntry(ctx, logEntry)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")

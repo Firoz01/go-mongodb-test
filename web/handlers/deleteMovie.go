@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"github.com/Firoz01/go-mongodb-test/mongodb"
+	"github.com/Firoz01/go-mongodb-test/mongodb/collections"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"net/http"
+	"time"
 )
 
 // DeleteMovie deletes a movie document by its ID in the MongoDB collection.
@@ -38,6 +40,19 @@ func DeleteMovie(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error deleting movie", http.StatusInternalServerError)
 		return
 	}
+
+	logEntry := collections.LogEntry{
+		Timestamp: time.Now(),
+		Message:   "movie item deleted",
+		Level:     "INFO",
+		Metadata: map[string]interface{}{
+			"service": "order-tracking",
+			"status":  "success",
+			"data":    movieID,
+		},
+	}
+
+	_ = mongodb.InsertLogEntry(ctx, logEntry)
 
 	w.WriteHeader(http.StatusOK)
 }
