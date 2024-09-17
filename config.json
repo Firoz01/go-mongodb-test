@@ -1,0 +1,7 @@
+{
+  "mode": "debug",
+  "service_name": "order-tracker",
+  "http_port": 3344,
+  "mongodb_url": "mongodb://localhost:27017",
+  "mongodb_db_name": "moviedb"
+}
