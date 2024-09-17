@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Firoz01/go-mongodb-test/config"
 	"log"
 	"os"
 	"path/filepath"
@@ -47,24 +48,23 @@ type InputMovie struct {
 
 func main() {
 
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Current working directory:", dir)
+	config.LoadConfig()
+	cfg := config.GetConfig()
 
-	client, err := connectToMongoDB("mongodb://localhost:27017")
+	client, err := connectToMongoDB(cfg.MongodbURL)
 	if err != nil {
 		log.Fatalf("MongoDB connection error: %v", err)
+		return
 	}
 	defer client.Disconnect(context.TODO())
 
-	db := client.Database("moviedb")
+	db := client.Database(cfg.MongodbDBName)
 	moviesCollection := db.Collection("movies")
 	castsCollection := db.Collection("casts")
 
 	if err := processJSONFiles("./cmd/seedmongodb/json-files", moviesCollection, castsCollection); err != nil {
 		log.Fatalf("Error processing JSON files: %v", err)
+		return
 	}
 
 	fmt.Println("All files have been processed successfully!")

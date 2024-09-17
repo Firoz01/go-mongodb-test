@@ -7,7 +7,6 @@ import (
 )
 
 func BuildMoviePipeline(query collections.MovieQuery, matchStage bson.M) mongo.Pipeline {
-
 	pipeline := mongo.Pipeline{
 		bson.D{
 			{"$lookup",
@@ -15,14 +14,14 @@ func BuildMoviePipeline(query collections.MovieQuery, matchStage bson.M) mongo.P
 					{"from", "casts"},
 					{"localField", "cast_id"},
 					{"foreignField", "_id"},
-					{"as", "result"},
+					{"as", "cast_info"},
 				},
 			},
 		},
 		bson.D{
 			{"$unwind",
 				bson.D{
-					{"path", "$result"},
+					{"path", "$cast_info"},
 					{"preserveNullAndEmptyArrays", true},
 				},
 			},

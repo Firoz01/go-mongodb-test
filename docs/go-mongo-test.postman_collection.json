@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "7aab6c59-f3ab-4d96-a988-e95130d304b2",
+		"name": "go-mongo-test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25328998",
+		"_collection_link": "https://lively-meadow-584140.postman.co/workspace/Team-Workspace~7a0d1045-0996-4af3-8976-8ba1e48be747/collection/25328998-7aab6c59-f3ab-4d96-a988-e95130d304b2?action=share&source=collection_link&creator=25328998"
+	},
+	"item": [
+		{
+			"name": "hello",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3344/hello",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3344",
+					"path": [
+						"hello"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "movies",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3344/movies",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3344",
+					"path": [
+						"movies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "moive_statistics",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3344/movies_statistics",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3344",
+					"path": [
+						"movies_statistics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"The Matrixs\",\n  \"year\": 1999,\n  \"genres\": [\"Action\", \"Sci-Fi\"],\n  \"href\": \"https://www.imdb.com/title/tt0133093/\",\n  \"extract\": \"A computer hacker learns about the true nature of reality and his role in the war against its controllers.\",\n  \"thumbnail\": \"https://example.com/thumbnail.jpg\",\n  \"thumbnailWidth\": 300,\n  \"thumbnailHeight\": 450,\n  \"cast\": [\n    \"Keanu Reeves\",\n    \"Laurence Fishburne\",\n    \"Carrie-Anne Moss\",\n    \"Hugo Weaving\"\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3344/movies",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3344",
+					"path": [
+						"movies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3344/movies?id=66e9476a8b85c1d35fea7fe2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3344",
+					"path": [
+						"movies"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "66e9476a8b85c1d35fea7fe2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\":\"firoz1\",\n    \"year\":1991\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3344/movies?id=66e92d5c33c9169823ac77df",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3344",
+					"path": [
+						"movies"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "66e92d5c33c9169823ac77df"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

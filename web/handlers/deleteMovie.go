@@ -1,22 +1,20 @@
 package handlers
 
 import (
-	"context"
 	"github.com/Firoz01/go-mongodb-test/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"net/http"
-	"time"
 )
 
 // DeleteMovie deletes a movie document by its ID in the MongoDB collection.
 func DeleteMovie(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-	defer cancel()
+	ctx := r.Context()
 
 	db := mongodb.GetDatabase()
-	collection := db.Collection("movies")
+	movieCollection := db.Collection("movies")
+	castCollection := db.Collection("casts")
 
 	// Get the movie ID from the URL query
 	movieID := r.URL.Query().Get("id")
@@ -27,12 +25,19 @@ func DeleteMovie(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete the movie from the collection
-	result, err := collection.DeleteOne(ctx, bson.M{"_id": id})
-	if err != nil || result.DeletedCount == 0 {
+	result1, err := movieCollection.DeleteOne(ctx, bson.M{"_id": id})
+	if err != nil || result1.DeletedCount == 0 {
 		log.Printf("Error deleting movie: %v", err)
 		http.Error(w, "Error deleting movie", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	result2, err := castCollection.DeleteOne(ctx, bson.M{"movie_id": id})
+	if err != nil || result2.DeletedCount == 0 {
+		log.Printf("Error deleting movie: %v", err)
+		http.Error(w, "Error deleting movie", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

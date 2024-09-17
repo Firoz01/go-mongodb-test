@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/Firoz01/go-mongodb-test/mongodb"
-	"github.com/Firoz01/go-mongodb-test/mongodb/collections"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
@@ -12,8 +11,7 @@ import (
 	"time"
 )
 
-// UpdateMovie updates a movie document by its ID in the MongoDB collection.
-func UpdateMovie(w http.ResponseWriter, r *http.Request) {
+func PatchMovie(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
@@ -28,18 +26,29 @@ func UpdateMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Decode the request body into a Movie struct
-	var movie collections.Movie
-	if err := json.NewDecoder(r.Body).Decode(&movie); err != nil {
+	// Decode the request body into a map for flexible field updates
+	var updates map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&updates); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	// Update the movie in the collection
-	update := bson.M{
-		"$set": movie,
+	// Prepare the update document dynamically
+	update := bson.M{"$set": bson.M{}}
+
+	// Loop over the provided fields and add them to the update document
+	for field, value := range updates {
+		// Ensure the fields are valid by checking the movie struct
+		switch field {
+		case "title", "year", "genres", "href", "extract", "thumbnail", "thumbnailWidth", "thumbnailHeight", "castId":
+			update["$set"].(bson.M)[field] = value
+		default:
+			http.Error(w, "Invalid field in request body", http.StatusBadRequest)
+			return
+		}
 	}
 
+	// Update the movie document only with the fields provided in the request body
 	result, err := collection.UpdateByID(ctx, id, update)
 	if err != nil || result.MatchedCount == 0 {
 		log.Printf("Error updating movie: %v", err)
@@ -47,7 +56,8 @@ func UpdateMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Respond with a success message or the updated movie (optional to fetch again)
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(movie)
+	json.NewEncoder(w).Encode(updates) // This will return the fields that were updated
 }

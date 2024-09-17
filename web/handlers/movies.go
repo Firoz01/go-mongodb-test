@@ -91,7 +91,7 @@ func Movies(w http.ResponseWriter, r *http.Request) {
 	defer cursor.Close(ctx)
 
 	// Decode movies
-	var movies []collections.Movie
+	var movies []collections.MovieWithCasts
 	if err = cursor.All(ctx, &movies); err != nil {
 		log.Printf("Error decoding query results: %v", err)
 		http.Error(w, "Error decoding query results", http.StatusInternalServerError)

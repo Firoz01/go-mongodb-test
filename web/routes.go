@@ -33,9 +33,9 @@ func InitRoutes(mux *http.ServeMux, manager *middlewares.Manager) {
 		),
 	)
 	mux.Handle(
-		"PUT /movies",
+		"PATCH /movies",
 		manager.With(
-			http.HandlerFunc(handlers.UpdateMovie),
+			http.HandlerFunc(handlers.PatchMovie),
 		),
 	)
 	mux.Handle(

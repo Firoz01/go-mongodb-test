@@ -1,43 +1,96 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/Firoz01/go-mongodb-test/mongodb"
 	"github.com/Firoz01/go-mongodb-test/mongodb/collections"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
 )
+
+func insertMovie(ctx context.Context, inputMovie collections.InputMovie, moviesCollection, castsCollection *mongo.Collection) (interface{}, error) {
+
+	castID, err := insertCast(ctx, inputMovie.Cast, castsCollection)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert cast: %v", err)
+	}
+
+	movie := collections.Movie{
+		ID:              primitive.NewObjectID(),
+		Title:           inputMovie.Title,
+		Year:            inputMovie.Year,
+		Genres:          inputMovie.Genres,
+		Href:            inputMovie.Href,
+		Extract:         inputMovie.Extract,
+		Thumbnail:       inputMovie.Thumbnail,
+		ThumbnailWidth:  inputMovie.ThumbnailWidth,
+		ThumbnailHeight: inputMovie.ThumbnailHeight,
+		CastID:          castID,
+	}
+
+	movieResult, err := moviesCollection.InsertOne(ctx, movie)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert movie: %v", err)
+	}
+
+	if err := updateCastWithMovieID(ctx, castID, movieResult.InsertedID.(primitive.ObjectID), castsCollection); err != nil {
+		return nil, fmt.Errorf("failed to update cast with movie ID: %v", err)
+	}
+
+	return movieResult.InsertedID.(primitive.ObjectID), nil
+}
+
+func insertCast(ctx context.Context, cast []string, castsCollection *mongo.Collection) (primitive.ObjectID, error) {
+	castDoc := collections.Cast{
+		ID:   primitive.NewObjectID(),
+		Cast: cast,
+	}
+
+	result, err := castsCollection.InsertOne(ctx, castDoc)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+
+	return result.InsertedID.(primitive.ObjectID), nil
+}
+
+func updateCastWithMovieID(ctx context.Context, castID, movieID primitive.ObjectID, castsCollection *mongo.Collection) error {
+	_, err := castsCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": castID},
+		bson.M{"$set": bson.M{"movie_id": movieID}},
+	)
+	return err
+}
 
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	db := mongodb.GetDatabase()
-	collection := db.Collection("movies")
+	movieCollection := db.Collection("movies")
+	castCollection := db.Collection("casts")
 
-	// Decode the request body into a Movie struct
-	var movie collections.Movie
-	if err := json.NewDecoder(r.Body).Decode(&movie); err != nil {
+	inputMovie := collections.InputMovie{}
+
+	if err := json.NewDecoder(r.Body).Decode(&inputMovie); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	// Set a new ObjectID if one isn't provided
-	if movie.ID.IsZero() {
-		movie.ID = primitive.NewObjectID()
-	}
+	id, err := insertMovie(ctx, inputMovie, movieCollection, castCollection)
 
-	// Insert the movie into the collection
-	result, err := collection.InsertOne(ctx, movie)
 	if err != nil {
-		log.Printf("Error inserting movie: %v", err)
-		http.Error(w, "Error creating movie", http.StatusInternalServerError)
-		return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(result); err != nil {
+	if err := json.NewEncoder(w).Encode(id); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		http.Error(w, "Error encoding response", http.StatusInternalServerError)
 	}

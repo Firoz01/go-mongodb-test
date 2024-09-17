@@ -1,10 +1,28 @@
-# Define the command-line arguments
-CONFIG_PATH=../../config.json
+# Define the path to the docker-compose.yml file
+COMPOSE_FILE = cmd/seedmongodb/docker-compose.yml
+COMPOSE_CMD = docker-compose -f $(COMPOSE_FILE)
 
-.PHONY: run
+# Define the path to the config file
+CONFIG_PATH = ./config.json
 
+.PHONY: run mongodb-seed mongodb-up mongodb-down
+
+# Run the server with the configuration file
 run:
-	-@go run ./cmd/server -c ./config.json
+	@echo "Running the Go server..."
+	@go run ./cmd/server -c $(CONFIG_PATH)
 
-seed-mongodb:
-	go run ./cmd/seedmongodb .
+# Seed MongoDB using the seedmongodb command
+mongodb-seed:
+	@echo "Seeding MongoDB..."
+	@go run ./cmd/seedmongodb
+
+# Start the Docker containers defined in docker-compose.yml
+mongodb-up:
+	@echo "Starting MongoDB containers..."
+	@$(COMPOSE_CMD) up -d
+
+# Stop and remove the Docker containers defined in docker-compose.yml
+mongodb-down:
+	@echo "Stopping and removing MongoDB containers..."
+	@$(COMPOSE_CMD) down
