@@ -1,4 +1,4 @@
-package handlers
+package movies
 
 import (
 	"github.com/Firoz01/go-mongodb-test/mongodb"
