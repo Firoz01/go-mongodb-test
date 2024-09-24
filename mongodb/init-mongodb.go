@@ -2,13 +2,15 @@ package mongodb
 
 import (
 	"context"
-	"github.com/Firoz01/go-mongodb-test/config"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log/slog"
 	"os"
 	"time"
+
+	"github.com/Firoz01/go-mongodb-test/config"
+	"github.com/Firoz01/go-mongodb-test/logger"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 var (
@@ -31,13 +33,17 @@ func initMongoDBInternal() (*mongo.Client, *mongo.Database) {
 
 	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
-		slog.Error("failed to connect")
+		slog.Error("failed to connect", logger.Extra(map[string]any{
+			"error": err.Error(),
+		}))
 		os.Exit(1)
 	}
 
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-		slog.Error("Failed to ping MongoDB")
+		slog.Error("Failed to ping MongoDB",logger.Extra(map[string]any{
+			"error": err.Error(),
+		}))
 		os.Exit(1)
 	}
 
@@ -53,7 +59,9 @@ func Disconnect() {
 		defer cancel()
 		err := client.Disconnect(ctx)
 		if err != nil {
-			slog.Error("Failed to disconnect from MongoDB")
+			slog.Error("Failed to disconnect from MongoDB",logger.Extra(map[string]any{
+			"error": err.Error(),
+		}))
 		}
 		slog.Info("Disconnected from MongoDB!")
 	}
