@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Firoz01/go-mongodb-test/config"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/Firoz01/go-mongodb-test/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -58,7 +59,7 @@ func main() {
 	}
 	defer client.Disconnect(context.TODO())
 
-	db := client.Database(cfg.MongodbDBName)
+	db := client.Database(cfg.MongodbDatabaseName)
 	moviesCollection := db.Collection("movies")
 	castsCollection := db.Collection("casts")
 
