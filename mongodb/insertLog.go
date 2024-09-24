@@ -11,7 +11,7 @@ func InsertLogEntry(ctx context.Context, logEntry collections.LogEntry) error {
 	collection := db.Collection("logs")
 
 	// Insert the log entry into the time series collection
-	_, err := collection.InsertOne(context.TODO(), logEntry)
+	_, err := collection.InsertOne(ctx, logEntry)
 	if err != nil {
 		return err
 	}

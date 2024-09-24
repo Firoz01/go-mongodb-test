@@ -8,11 +8,11 @@ const (
 )
 
 type Config struct {
-	Mode          Mode   `json:"mode"                              validate:"required"`
-	ServiceName   string `json:"service_name"                      validate:"required"`
-	HttpPort      int    `json:"http_port"                         validate:"required"`
-	MongodbURL    string `json:"mongodb_url"                       validate:"required"`
-	MongodbDBName string `json:"mongodb_db_name"                    validate:"required"`
+	Mode                Mode   `json:"mode"                              validate:"required"`
+	ServiceName         string `json:"service_name"                      validate:"required"`
+	HttpPort            int    `json:"http_port"                         validate:"required"`
+	MongodbURL          string `json:"mongodb_url"                       validate:"required"`
+	MongodbDatabaseName string `json:"mongodb_database_name"                    validate:"required"`
 }
 
 var config *Config

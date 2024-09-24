@@ -1,13 +1,11 @@
 package app
 
 import (
-	"context"
 	"github.com/Firoz01/go-mongodb-test/config"
+	"github.com/Firoz01/go-mongodb-test/logger"
 	"github.com/Firoz01/go-mongodb-test/mongodb"
 	"github.com/Firoz01/go-mongodb-test/web"
-	"log"
 	"sync"
-	"time"
 )
 
 type Application struct {
@@ -20,14 +18,9 @@ func NewApplication() *Application {
 
 func (app *Application) Init() {
 	config.LoadConfig()
-	cfg := config.GetConfig()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	_, err := mongodb.GetClient(ctx, cfg.MongodbURL, cfg.MongodbDBName)
-	if err != nil {
-		log.Fatalf("Failed to initialize MongoDB client: %v", err)
-	}
+	conf := config.GetConfig()
+	logger.SetupLogger(conf.ServiceName)
+	mongodb.InitMongoDB()
 
 }
 
@@ -41,7 +34,5 @@ func (app *Application) Wait() {
 }
 
 func (app *Application) Cleanup() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	mongodb.Disconnect(ctx) // Graceful shutdown to disconnect MongoDB
+	mongodb.Disconnect() // Graceful shutdown to disconnect MongoDB
 }

@@ -3,5 +3,5 @@
   "service_name": "order-tracker",
   "http_port": 3344,
   "mongodb_url": "mongodb://root:abcd1234@localhost:27017",
-  "mongodb_db_name": "moviesDB"
+  "mongodb_database_name": "moviesDB"
 }
