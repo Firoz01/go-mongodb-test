@@ -59,10 +59,11 @@ func Disconnect() {
 		defer cancel()
 		err := client.Disconnect(ctx)
 		if err != nil {
-			slog.Error("Failed to disconnect from MongoDB",logger.Extra(map[string]any{
-			"error": err.Error(),
-		}))
+			slog.Error("Failed to disconnect from MongoDB", logger.Extra(map[string]any{
+				"error": err.Error(),
+			}))
 		}
 		slog.Info("Disconnected from MongoDB!")
 	}
 }
+ 
