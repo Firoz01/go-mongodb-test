@@ -2,10 +2,12 @@ package restaurants
 
 import (
 	"encoding/json"
-	"github.com/Firoz01/go-mongodb-test/mongodb/collections"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
+
+	"github.com/Firoz01/go-mongodb-test/logger"
+	"github.com/Firoz01/go-mongodb-test/mongodb/collections"
 
 	"github.com/Firoz01/go-mongodb-test/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,7 +46,9 @@ func FindRestaurants(w http.ResponseWriter, r *http.Request) {
 	cursor, err := restaurantCollection.Find(ctx, filter, findOptions)
 	if err != nil {
 		http.Error(w, "Failed to fetch restaurants", http.StatusInternalServerError)
-		log.Printf("Error finding restaurants: %v", err)
+		slog.Error("Failed to fetch restaurants", logger.Extra(map[string]any{
+			"error": err.Error(),
+		}))
 		return
 	}
 	defer cursor.Close(ctx)
@@ -53,7 +57,9 @@ func FindRestaurants(w http.ResponseWriter, r *http.Request) {
 
 	if err := cursor.All(ctx, &restaurants); err != nil {
 		http.Error(w, "Failed to decode restaurants", http.StatusInternalServerError)
-		log.Printf("Error decoding restaurants: %v", err)
+				slog.Error("Error decoding restaurants", logger.Extra(map[string]any{
+			"error": err.Error(),
+		}))
 		return
 	}
 
